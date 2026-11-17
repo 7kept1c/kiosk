@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="ключи киоск.db" readonly="0" foreign_keys="0" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="0"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2023"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="sqlite_sequence" custom_title="0" dock_id="1" table="4,15:mainsqlite_sequence"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000012e00ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1">PRAGMA foreign_keys = ON;
+
+DROP TABLE IF EXISTS &quot;продажи&quot;;
+DROP TABLE IF EXISTS &quot;наличие_в_аптеке&quot;;
+DROP TABLE IF EXISTS &quot;серии_и_сроки_годности&quot;;
+DROP TABLE IF EXISTS &quot;аналоги&quot;;
+DROP TABLE IF EXISTS &quot;справочник_препаратов&quot;;
+
+CREATE TABLE &quot;справочник_препаратов&quot; (
+    &quot;айди_препарата&quot; INTEGER,
+    &quot;название&quot; TEXT NOT NULL,
+    &quot;действующее_вещество&quot; TEXT,
+    &quot;форма_выпуска&quot; TEXT,
+    &quot;условия_хранения&quot; TEXT,
+    PRIMARY KEY (&quot;айди_препарата&quot; AUTOINCREMENT)
+);
+
+CREATE TABLE &quot;наличие_в_аптеке&quot; (
+    &quot;айди_записи&quot; INTEGER,
+    &quot;айди_препарата&quot; INTEGER,
+    &quot;цена&quot; REAL CHECK(&quot;цена&quot; &gt;= 0),
+    &quot;условия_отпуска&quot; TEXT,
+    PRIMARY KEY (&quot;айди_записи&quot; AUTOINCREMENT),
+    FOREIGN KEY (&quot;айди_препарата&quot;) REFERENCES &quot;справочник_препаратов&quot; (&quot;айди_препарата&quot;)
+);
+
+CREATE TABLE &quot;серии_и_сроки_годности&quot; (
+    &quot;айди_серии&quot; INTEGER,
+    &quot;айди_препарата&quot; INTEGER,
+    &quot;номер_серии&quot; TEXT,
+    &quot;срок_годности&quot; TEXT,
+    &quot;количество_упаковок&quot; INTEGER,
+    PRIMARY KEY (&quot;айди_серии&quot; AUTOINCREMENT),
+    FOREIGN KEY (&quot;айди_препарата&quot;) REFERENCES &quot;справочник_препаратов&quot; (&quot;айди_препарата&quot;)
+);
+
+CREATE TABLE &quot;продажи&quot; (
+    &quot;айди_продажи&quot; INTEGER,
+    &quot;айди_серии&quot; INTEGER,
+    &quot;количество&quot; INTEGER NOT NULL,
+    &quot;дата_продажи&quot; TEXT NOT NULL DEFAULT (DATE('now')),
+    &quot;итоговая_сумма&quot; REAL,
+    PRIMARY KEY (&quot;айди_продажи&quot; AUTOINCREMENT),
+    FOREIGN KEY (&quot;айди_серии&quot;) REFERENCES &quot;серии_и_сроки_годности&quot; (&quot;айди_серии&quot;)
+);
+
+CREATE TABLE &quot;аналоги&quot; (
+    &quot;айди_связи&quot; INTEGER,
+    &quot;айди_препарата&quot; INTEGER,
+    &quot;айди_аналога&quot; INTEGER,
+    PRIMARY KEY (&quot;айди_связи&quot; AUTOINCREMENT),
+    FOREIGN KEY (&quot;айди_препарата&quot;) REFERENCES &quot;справочник_препаратов&quot; (&quot;айди_препарата&quot;),
+    FOREIGN KEY (&quot;айди_аналога&quot;) REFERENCES &quot;справочник_препаратов&quot; (&quot;айди_препарата&quot;)
+);</sql><sql name="SQL 2*">INSERT INTO &quot;справочник_препаратов&quot; (&quot;название&quot;, &quot;действующее_вещество&quot;, &quot;форма_выпуска&quot;, &quot;условия_хранения&quot;) VALUES
+('Цитрамон-П', 'Ацетилсалициловая кислота', 'Таблетки', 'Сухое, защищенное от света место'),
+('Аспирин Кардио', 'Ацетилсалициловая кислота', 'Таблетки', 'При температуре не выше 25 °C'),
+('Нурофен', 'Ибупрофен', 'Таблетки', 'В сухом месте'),
+('Панадол', 'Парацетамол', 'Таблетки', 'Сухое место'),
+('Амбробене', 'Амброксол', 'Сироп', 'При комнатной температуре'),
+('Арбидол', 'Умифеновир', 'Капсулы', 'Сухое, защищенное от света место'),
+('Мирамистин', 'Бензилдиметил-миристоиламино-пропиламмоний', 'Раствор', 'При комнатной температуре'),
+('Анальгин', 'Метамизол натрия', 'Таблетки', 'В защищенном от света месте'),
+('Но-Шпа', 'Дротаверин', 'Таблетки', 'Сухое место'),
+('Валидол', 'Левоментол', 'Таблетки', 'В прохладном месте');
+
+INSERT INTO &quot;наличие_в_аптеке&quot; (&quot;айди_препарата&quot;, &quot;цена&quot;, &quot;условия_отпуска&quot;) VALUES
+(1, 175.00, 'По рецепту'), (2, 320.00, 'Без рецепта'), (3, 480.99, 'Без рецепта'), 
+(4, 210.00, 'Без рецепта'), (5, 350.00, 'По рецепту'), (6, 550.00, 'Без рецепта'),
+(7, 290.00, 'Без рецепта'), (8, 80.00, 'Без рецепта'), (9, 150.00, 'Без рецепта'), 
+(10, 60.00, 'Без рецепта');
+
+INSERT INTO &quot;серии_и_сроки_годности&quot; (&quot;айди_препарата&quot;, &quot;номер_серии&quot;, &quot;срок_годности&quot;, &quot;количество_упаковок&quot;) VALUES
+(1, 'SER-A101', '2025-12-01', 45), (2, 'SER-B202', '2026-05-15', 20), 
+(3, 'SER-C303', '2024-11-20', 12), (4, 'SER-D404', '2027-01-10', 30),
+(5, 'SER-E505', '2025-08-30', 8), (6, 'SER-F606', '2026-02-15', 50),
+(7, 'SER-G707', '2025-10-10', 25), (8, 'SER-H808', '2024-12-31', 100);
+
+INSERT INTO &quot;продажи&quot; (&quot;айди_серии&quot;, &quot;количество&quot;, &quot;дата_продажи&quot;, &quot;итоговая_сумма&quot;) VALUES
+(1, 2, '2024-05-10', 301.00), (2, 1, '2024-05-10', 320.00),
+(3, 1, '2024-05-11', 480.99), (1, 3, '2024-05-11', 451.50),
+(4, 2, '2024-05-12', 420.00), (5, 1, '2024-05-12', 350.00),
+(6, 2, '2024-05-13', 1100.00);
+
+INSERT INTO &quot;аналоги&quot; (&quot;айди_препарата&quot;, &quot;айди_аналога&quot;) VALUES
+(1, 2), (2, 1), (3, 4), (4, 3), (1, 4), (6, 7), (7, 6), (9, 10);</sql><sql name="ошибка key*">INSERT INTO &quot;продажи&quot; (&quot;айди_серии&quot;, &quot;количество&quot;, &quot;итоговая_сумма&quot;) 
+VALUES (999, 1, 100.00);</sql><sql name="SQL 4*">CREATE INDEX &quot;idx_наличие_препарат&quot; ON &quot;наличие_в_аптеке&quot; (&quot;айди_препарата&quot;);
+CREATE INDEX &quot;idx_серии_препарат&quot; ON &quot;серии_и_сроки_годности&quot; (&quot;айди_препарата&quot;);
+CREATE INDEX &quot;idx_продажи_серия&quot; ON &quot;продажи&quot; (&quot;айди_серии&quot;);
+CREATE INDEX &quot;idx_препарат_название&quot; ON &quot;справочник_препаратов&quot; (&quot;название&quot;);</sql><current_tab id="3"/></tab_sql></sqlb_project>
