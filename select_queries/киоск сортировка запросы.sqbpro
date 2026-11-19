@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="киоск сортировка.db" readonly="0" foreign_keys="0" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2023"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="справочник_препаратов" custom_title="0" dock_id="1" table="4,41:mainсправочник_препаратов"/><dock_state state="000000ff00000000fd000000010000000200000697000002e7fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000000006970000012e00ffffff000006970000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="sqlite_sequence" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="215"/><column index="2" value="35"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Крупные_продажи" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="97"/><column index="2" value="75"/><column index="3" value="76"/><column index="4" value="105"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Серии_2025" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="75"/><column index="2" value="106"/><column index="3" value="83"/><column index="4" value="97"/><column index="5" value="139"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="справочник_препаратов" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="106"/><column index="2" value="119"/><column index="3" value="300"/><column index="4" value="104"/><column index="5" value="263"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">PRAGMA foreign_keys = ON;
+
+DROP TABLE IF EXISTS &quot;продажи&quot;;
+DROP TABLE IF EXISTS &quot;наличие_в_аптеке&quot;;
+DROP TABLE IF EXISTS &quot;серии_и_сроки_годности&quot;;
+DROP TABLE IF EXISTS &quot;аналоги&quot;;
+DROP TABLE IF EXISTS &quot;справочник_препаратов&quot;;
+
+CREATE TABLE &quot;справочник_препаратов&quot; (
+    &quot;айди_препарата&quot; INTEGER,
+    &quot;название&quot; TEXT NOT NULL,
+    &quot;действующее_вещество&quot; TEXT,
+    &quot;форма_выпуска&quot; TEXT,
+    &quot;условия_хранения&quot; TEXT,
+    PRIMARY KEY (&quot;айди_препарата&quot; AUTOINCREMENT)
+);
+
+CREATE TABLE &quot;наличие_в_аптеке&quot; (
+    &quot;айди_записи&quot; INTEGER,
+    &quot;айди_препарата&quot; INTEGER,
+    &quot;цена&quot; REAL CHECK(&quot;цена&quot; &gt;= 0),
+    &quot;условия_отпуска&quot; TEXT,
+    PRIMARY KEY (&quot;айди_записи&quot; AUTOINCREMENT),
+    FOREIGN KEY (&quot;айди_препарата&quot;) REFERENCES &quot;справочник_препаратов&quot; (&quot;айди_препарата&quot;)
+);
+
+CREATE TABLE &quot;серии_и_сроки_годности&quot; (
+    &quot;айди_серии&quot; INTEGER,
+    &quot;айди_препарата&quot; INTEGER,
+    &quot;номер_серии&quot; TEXT,
+    &quot;срок_годности&quot; TEXT,
+    &quot;количество_упаковок&quot; INTEGER,
+    PRIMARY KEY (&quot;айди_серии&quot; AUTOINCREMENT),
+    FOREIGN KEY (&quot;айди_препарата&quot;) REFERENCES &quot;справочник_препаратов&quot; (&quot;айди_препарата&quot;)
+);
+
+CREATE TABLE &quot;продажи&quot; (
+    &quot;айди_продажи&quot; INTEGER,
+    &quot;айди_серии&quot; INTEGER,
+    &quot;количество&quot; INTEGER NOT NULL,
+    &quot;дата_продажи&quot; TEXT NOT NULL DEFAULT (DATE('now')),
+    &quot;итоговая_сумма&quot; REAL,
+    PRIMARY KEY (&quot;айди_продажи&quot; AUTOINCREMENT),
+    FOREIGN KEY (&quot;айди_серии&quot;) REFERENCES &quot;серии_и_сроки_годности&quot; (&quot;айди_серии&quot;)
+);
+
+CREATE TABLE &quot;аналоги&quot; (
+    &quot;айди_связи&quot; INTEGER,
+    &quot;айди_препарата&quot; INTEGER,
+    &quot;айди_аналога&quot; INTEGER,
+    PRIMARY KEY (&quot;айди_связи&quot; AUTOINCREMENT),
+    FOREIGN KEY (&quot;айди_препарата&quot;) REFERENCES &quot;справочник_препаратов&quot; (&quot;айди_препарата&quot;),
+    FOREIGN KEY (&quot;айди_аналога&quot;) REFERENCES &quot;справочник_препаратов&quot; (&quot;айди_препарата&quot;)
+);</sql><sql name="SQL 2">INSERT INTO &quot;справочник_препаратов&quot; (&quot;название&quot;, &quot;действующее_вещество&quot;, &quot;форма_выпуска&quot;, &quot;условия_хранения&quot;) VALUES
+('Цитрамон-П', 'Ацетилсалициловая кислота', 'Таблетки', 'Сухое, защищенное от света место'),
+('Аспирин Кардио', 'Ацетилсалициловая кислота', 'Таблетки', 'При температуре не выше 25 °C'),
+('Нурофен', 'Ибупрофен', 'Таблетки', 'В сухом месте'),
+('Панадол', 'Парацетамол', 'Таблетки', 'Сухое место'),
+('Амбробене', 'Амброксол', 'Сироп', 'При комнатной температуре'),
+('Арбидол', 'Умифеновир', 'Капсулы', 'Сухое, защищенное от света место'),
+('Мирамистин', 'Бензилдиметил-миристоиламино-пропиламмоний', 'Раствор', 'При комнатной температуре'),
+('Анальгин', 'Метамизол натрия', 'Таблетки', 'В защищенном от света месте'),
+('Но-Шпа', 'Дротаверин', 'Таблетки', 'Сухое место'),
+('Валидол', 'Левоментол', 'Таблетки', 'В прохладном месте');
+
+INSERT INTO &quot;наличие_в_аптеке&quot; (&quot;айди_препарата&quot;, &quot;цена&quot;, &quot;условия_отпуска&quot;) VALUES
+(1, 175.00, 'По рецепту'), (2, 320.00, 'Без рецепта'), (3, 480.99, 'Без рецепта'), 
+(4, 210.00, 'Без рецепта'), (5, 350.00, 'По рецепту'), (6, 550.00, 'Без рецепта'),
+(7, 290.00, 'Без рецепта'), (8, 80.00, 'Без рецепта'), (9, 150.00, 'Без рецепта'), 
+(10, 60.00, 'Без рецепта');
+
+INSERT INTO &quot;серии_и_сроки_годности&quot; (&quot;айди_препарата&quot;, &quot;номер_серии&quot;, &quot;срок_годности&quot;, &quot;количество_упаковок&quot;) VALUES
+(1, 'SER-A101', '2025-12-01', 45), (2, 'SER-B202', '2026-05-15', 20), 
+(3, 'SER-C303', '2024-11-20', 12), (4, 'SER-D404', '2027-01-10', 30),
+(5, 'SER-E505', '2025-08-30', 8), (6, 'SER-F606', '2026-02-15', 50),
+(7, 'SER-G707', '2025-10-10', 25), (8, 'SER-H808', '2024-12-31', 100);
+
+INSERT INTO &quot;продажи&quot; (&quot;айди_серии&quot;, &quot;количество&quot;, &quot;дата_продажи&quot;, &quot;итоговая_сумма&quot;) VALUES
+(1, 2, '2024-05-10', 301.00), (2, 1, '2024-05-10', 320.00),
+(3, 1, '2024-05-11', 480.99), (1, 3, '2024-05-11', 451.50),
+(4, 2, '2024-05-12', 420.00), (5, 1, '2024-05-12', 350.00),
+(6, 2, '2024-05-13', 1100.00);
+
+INSERT INTO &quot;аналоги&quot; (&quot;айди_препарата&quot;, &quot;айди_аналога&quot;) VALUES
+(1, 2), (2, 1), (3, 4), (4, 3), (1, 4), (6, 7), (7, 6), (9, 10);</sql><sql name="SQL 3">CREATE INDEX &quot;idx_наличие_препарат&quot; ON &quot;наличие_в_аптеке&quot; (&quot;айди_препарата&quot;);
+CREATE INDEX &quot;idx_серии_препарат&quot; ON &quot;серии_и_сроки_годности&quot; (&quot;айди_препарата&quot;);
+CREATE INDEX &quot;idx_продажи_серия&quot; ON &quot;продажи&quot; (&quot;айди_серии&quot;);
+CREATE INDEX &quot;idx_препарат_название&quot; ON &quot;справочник_препаратов&quot; (&quot;название&quot;);</sql><sql name="справочник препаратов*">SELECT &quot;название&quot;, &quot;действующее_вещество&quot;, &quot;форма_выпуска&quot; 
+FROM &quot;справочник_препаратов&quot; 
+WHERE &quot;форма_выпуска&quot; = 'Таблетки' 
+ORDER BY &quot;название&quot;;
+
+SELECT * FROM &quot;справочник_препаратов&quot; 
+WHERE &quot;название&quot; LIKE '%Аспирин%';</sql><sql name="поставщики и производители*">SELECT &quot;название_компании&quot;, &quot;тип_компании&quot;, &quot;телефон&quot; 
+FROM &quot;поставщики_и_производители&quot; 
+WHERE &quot;адрес&quot; LIKE '%Москва%';
+
+SELECT * FROM &quot;поставщики_и_производители&quot; 
+WHERE &quot;тип_компании&quot; = 'Производитель' 
+ORDER BY &quot;название_компании&quot;;</sql><sql name="акции*">SELECT &quot;название_акции&quot;, &quot;размер_скидки_процент&quot; 
+FROM &quot;акции_и_скидки&quot; 
+WHERE &quot;размер_скидки_процент&quot; &gt; 10 
+ORDER BY &quot;размер_скидки_процент&quot; DESC;
+
+SELECT * FROM &quot;акции_и_скидки&quot; 
+WHERE &quot;дата_окончания&quot; &lt; '2024-06-01';</sql><sql name="наличие*">SELECT &quot;айди_препарата&quot;, &quot;цена&quot;, &quot;условия_отпуска&quot; 
+FROM &quot;наличие_в_аптеке&quot; 
+WHERE &quot;цена&quot; BETWEEN 200 AND 500 
+ORDER BY &quot;цена&quot; DESC;
+
+SELECT * FROM &quot;наличие_в_аптеке&quot; 
+WHERE &quot;условия_отпуска&quot; = 'По рецепту';</sql><sql name="аналоги*">SELECT * FROM &quot;аналоги&quot; 
+WHERE &quot;айди_препарата&quot; = 1;
+
+SELECT * FROM &quot;аналоги&quot; 
+WHERE &quot;айди_аналога&quot; = 4;</sql><sql name="серии и сроки*">SELECT &quot;номер_серии&quot;, &quot;количество_упаковок&quot; 
+FROM &quot;серии_и_сроки_годности&quot; 
+WHERE &quot;количество_упаковок&quot; &lt; 20 
+ORDER BY &quot;количество_упаковок&quot; ASC;
+
+CREATE TABLE &quot;Серии_2025&quot; AS
+SELECT * FROM &quot;серии_и_сроки_годности&quot; 
+WHERE &quot;срок_годности&quot; BETWEEN '2025-01-01' AND '2025-12-31';
+
+SELECT * FROM &quot;Серии_2025&quot;;</sql><sql name="продажи*">SELECT * FROM &quot;продажи&quot; 
+WHERE &quot;дата_продажи&quot; &gt; '2024-05-10' 
+ORDER BY &quot;итоговая_сумма&quot; DESC;
+
+CREATE TABLE &quot;Крупные_продажи&quot; AS
+SELECT &quot;айди_продажи&quot;, &quot;айди_серии&quot;, &quot;количество&quot;, &quot;итоговая_сумма&quot; 
+FROM &quot;продажи&quot; 
+WHERE &quot;количество&quot; &gt;= 2;
+
+SELECT * FROM &quot;Крупные_продажи&quot;;</sql><current_tab id="4"/></tab_sql></sqlb_project>
